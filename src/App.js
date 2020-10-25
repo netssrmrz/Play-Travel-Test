@@ -1,23 +1,35 @@
-import logo from './logo.svg';
 import './App.css';
+import Clock from "./components/Clock";
 
-function App() {
+function App() 
+{
+  function onGetData()
+  {
+    var dice = 3;
+    var sides = 6;
+    var query = `query RollDice($dice: Int!, $sides: Int) {
+      rollDice(numDice: $dice, numSides: $sides)
+    }`;
+    
+    fetch('//localhost:8080/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables: { dice, sides },
+      })
+    })
+      .then(r => r.json())
+      .then(data => console.log('data returned:', data));
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Clock></Clock>
+      <button onClick={onGetData}>Get Data</button>
     </div>
   );
 }
