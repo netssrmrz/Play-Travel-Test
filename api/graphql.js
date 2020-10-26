@@ -1,5 +1,5 @@
 var { buildSchema } = require('graphql');
-var Sample = require('./Sample');
+var User = require('./User');
 
 class RandomDie {
   constructor(numSides) {
@@ -19,31 +19,10 @@ class RandomDie {
   }
 }
 
-/*
-class Message {
-  constructor(id, {content, author}) {
-    this.id = id;
-    this.content = content;
-    this.author = author;
-  }
-}*/
-
 var schema = buildSchema(`
-  input MessageInput {
-    content: String
-    author: String
-  }
-
-  type Message {
-    id: ID!
-    content: String
-    author: String
-  }
-
-  type RandomDie {
-    numSides: Int!
-    rollOnce: Int!
-    roll(numRolls: Int!): [Int]
+  type User {
+    fullName: String
+    countryName: String
   }
 
   type Query {
@@ -51,13 +30,7 @@ var schema = buildSchema(`
     random: Float!
     rollThreeDice: [Int]
     rollDice(numDice: Int!, numSides: Int): [Int]
-    getDie(numSides: Int): RandomDie
-    getMessage(id: ID!): Message
-  }
-
-  type Mutation {
-    createMessage(input: MessageInput): Message
-    updateMessage(id: ID!, input: MessageInput): Message
+    getUserByIdWithCountry(id: ID!): User
   }
 `);
 
@@ -79,28 +52,24 @@ var root = {
     }
     return output;
   },
-  getDie: ({numSides}) => {
-    return new RandomDie(numSides || 6);
-  },
-  getMessage: async function({id})
+  getUserByIdWithCountry: async function({id})
   {
-    const res = await Sample.selectById(id);
-    return res;
-  },
-  createMessage: ({input}) => {
-    // Create a random id for our "database".
-    var id = require('crypto').randomBytes(10).toString('hex');
-    //fakeDatabase[id] = input;
-    return new Message(id, input);
-  },
-  updateMessage: ({id, input}) => {
-    /*if (!fakeDatabase[id]) {
-      throw new Error('no message exists with id ' + id);
+    let res = {fullName: null, countryName: null};
+
+    console.log("getUserByIdWithCountry(): id =", id);
+    const user = await User.selectByIdWithCountry(id);
+    if (user !== undefined)
+    {
+      console.log("getUserByIdWithCountry(): user =", user);
+      res.fullName = user.fullname;
+      res.countryName = user.country_name;
     }
-    // This replaces all old data, but some apps might want partial update.
-    fakeDatabase[id] = input;
-    return new Message(id, input);*/
-    return null;
+    else
+    {
+      console.log("getUserByIdWithCountry(): no user");
+    }
+
+    return res;
   },
 };
 

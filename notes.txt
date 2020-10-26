@@ -1,0 +1,25 @@
+insert into public.countries (code, name, continent_name) values (1, 'Argentina', 'South America');
+insert into public.countries (code, name, continent_name) values (2, 'Australia', 'Oceania');
+insert into public.countries (code, name, continent_name) values (3, 'Brazil', 'South America');
+select * from public.countries;
+
+delete from countries;
+
+insert into public.users (fullname, created_at, country_code, password, email) values ('Fred Flintstone', NOW(), 1, 'password1', 'ff@bedrock.com');
+insert into public.users (fullname, created_at, country_code, password, email) values ('Wilma Flintstone', NOW(), 2, 'password2', 'wf@bedrock.com');
+insert into public.users (fullname, created_at, country_code, password, email) values ('Barney Rubble', NOW(), 3, 'password3', 'br@bedrock.com');
+select * from public.users;
+
+      /*resHttp = await fetch('//localhost:8080/userSelectByIdWithCountry/' + resJson.id, 
+      {
+        method: 'GET',
+        headers: 
+        {
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json',
+          "Authorization": "Bearer " + resJson.token
+        },
+      });
+      resJson = await resHttp.json();*/
+
+      //{"data":{"getUserByIdWithCountry":{"fullName":"Fred Flintstone","countryName":"Argentina"}}}

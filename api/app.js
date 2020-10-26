@@ -3,19 +3,61 @@ var { graphqlHTTP } = require('express-graphql');
 var { schema, root } = require('./graphql');
 const { Pool, Client } = require('pg')
 var cors = require('cors');
+const User = require('./User');
+var jwt = require('express-jwt');
+const jwtBuild = require('jsonwebtoken');
 
-const app = express()
-const port = 8080
+const jwtSecret = "cambia, todo cambia";
+const jwtProtect = jwt({ secret: jwtSecret, algorithms: ['HS256'] });
+
+const app = express();
+const port = 8080;
 
 app.use(cors());
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', jwtProtect, graphqlHTTP({
   schema: schema,
   rootValue: root,
   graphiql: true,
 }));
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.get('/userSelectByIdWithCountry/:id', jwtProtect, async (req, res) => 
+{
+  let resJson = {fullname: null, countryName: null};
+
+  if (!req.user.admin) 
+  {
+    res.sendStatus(401);
+  }
+  else
+  {
+    const user = await User.selectByIdWithCountry(req.params.id);
+    if (user !== undefined)
+    {
+      resJson.fullname = user.fullname;
+      resJson.countryName = user.country_name;
+
+      res.send(resJson);
+    }
+  }
+});
+
+app.get('/userLogin/:email/:password', async (req, res) => 
+{
+  let resJson = {id: null, token: null};
+
+  const user = await User.selectByEmailAndPassword(req.params.email, req.params.password);
+  if (user !== undefined)
+  {
+    const token = jwtBuild.sign(
+      { id: user.id, username: user.fullname, admin: true },
+      jwtSecret,
+      { expiresIn: 129600 }
+    );
+    resJson.id = user.id;
+    resJson.token = token;
+  }
+
+  res.send(resJson);
 });
 
 app.get('/pg', getPg);
